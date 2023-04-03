@@ -7,7 +7,7 @@ import java.awt.*;
 import java.util.ArrayList;
 
 /**
- * I have created an example in Excel with charts and data copied from this program
+ * I have created an example in Excel with chart and data copied from this program
  */
 public class MidpointSimulation extends JFrame{
     private static final int g = 10;
@@ -27,7 +27,7 @@ public class MidpointSimulation extends JFrame{
 
     /**
      * Function that adds records from list specified as parameter to text area,
-     * so user can easily copy records and paste it to e.g. Excel
+     * so user can easily copy records and paste it to e.g. excel
      */
     public static void addListToArea(ArrayList<Double> list, String str, JTextArea textArea, JButton button, int rows){
         for (int i = 0; i < rows; i++) {
@@ -40,11 +40,16 @@ public class MidpointSimulation extends JFrame{
      * Function that calculates x and y for both motions (motion of the centre of mass and rolling motion)
      * also method calculates Ek, Ep and Et
      */
-    public static void calculationsForSimulation(int rows,double alpha, double mass, double h, double r, double dt) {
+    public static void calculationsForSimulation(int rows, double alpha, double mass, double h, double r, double dt, boolean isHollow) {
         double sX_R = 0;
         double sY_R = r;
         double v = 0;
-        double I = 2 / 5 * mass * Math.pow(r,2);
+        double I;
+        if(isHollow){
+            I = (double) 2 / 3 * mass * Math.pow(r,2);
+        } else {
+            I = (double) 2 / 5 * mass * Math.pow(r,2);
+        }
         double a = g * Math.sin(alpha)/(1 + I /(mass * Math.pow(r, 2)));
 
         double beta = 0;
@@ -99,13 +104,12 @@ public class MidpointSimulation extends JFrame{
      * and adds them to corresponding lists. After that correlated text areas and buttons are added to help user to utilize
      * calculated data easily.
      */
-    public MidpointSimulation(int rows, double alpha, double mass, double h, double r, double dt) {
+    public MidpointSimulation(int rows, double alpha, double mass, double h, double r, double dt, boolean isHollow) {
 
         if(!inRadians) {
             alpha = Math.toRadians(alpha);
         }
-
-        calculationsForSimulation(rows, alpha, mass, h, r, dt);
+        calculationsForSimulation(rows, alpha, mass, h, r, dt, isHollow);
 
         setTitle("Midpoint");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -169,12 +173,22 @@ public class MidpointSimulation extends JFrame{
         JLabel label6 = new JLabel("Provide Δt value:");
         JTextField deltaTField = new JTextField();
 
-        JButton calculateButton = new JButton("Calculate using Midpoint method");
+        JButton calculateButton = new JButton("<html>Perform calculations using <br> Midpoint method for hollow sphere</html>");
         calculateButton.addActionListener(e -> {
             try {
                 new MidpointSimulation(Integer.parseInt(textField.getText()),
                         Double.parseDouble(alphaField.getText()),Double.parseDouble(massField.getText()),
-                        Double.parseDouble(hField.getText()), Double.parseDouble(rField.getText()), Double.parseDouble(deltaTField.getText()));
+                        Double.parseDouble(hField.getText()), Double.parseDouble(rField.getText()), Double.parseDouble(deltaTField.getText()), true);
+            } catch (NumberFormatException ex){
+                System.out.println("Try again, remember to pass all arguments");
+            }
+        });
+        JButton calculateButton2 = new JButton("<html>Perform calculations using <br> Midpoint method for full sphere</html>");
+        calculateButton2.addActionListener(e -> {
+            try {
+                new MidpointSimulation(Integer.parseInt(textField.getText()),
+                        Double.parseDouble(alphaField.getText()),Double.parseDouble(massField.getText()),
+                        Double.parseDouble(hField.getText()), Double.parseDouble(rField.getText()), Double.parseDouble(deltaTField.getText()), false);
             } catch (NumberFormatException ex){
                 System.out.println("Try again, remember to pass all arguments");
             }
@@ -214,6 +228,7 @@ public class MidpointSimulation extends JFrame{
         panel.add(deltaTField);
 
         panel.add(calculateButton);
+        panel.add(calculateButton2);
 
         panel.add(changeToRadiansOrDegreesButton);
 
